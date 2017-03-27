@@ -10,8 +10,56 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="todo.mqtt.com.mqtttodo.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:text="To Do List!"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:textAlignment="textStart"
+            android:textSize="30sp" />
+
+        <CheckedTextView
+            android:text="Llamada Despertadora!"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkedTextView"
+            android:checked="false"
+            android:fontFamily="monospace"
+            android:textAlignment="center" />
+
+        <CheckedTextView
+            android:text="Estoy en el carro."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkedTextView2"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:textAlignment="center" />
+
+        <CheckedTextView
+            android:text="Salí del trabajo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkedTextView3"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:textAlignment="center" />
+
+        <CheckedTextView
+            android:text="Me voy a dormir."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkedTextView4"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:textAlignment="center" />
+    </LinearLayout>
 </RelativeLayout>
