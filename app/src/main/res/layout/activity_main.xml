@@ -15,7 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:weightSum="1">
 
         <TextView
             android:text="To Do List!"
@@ -26,40 +27,33 @@
             android:textAlignment="textStart"
             android:textSize="30sp" />
 
-        <CheckedTextView
-            android:text="Llamada Despertadora!"
+        <Space
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/checkedTextView"
-            android:checked="false"
-            android:fontFamily="monospace"
-            android:textAlignment="center" />
+            android:layout_weight="0.03" />
 
-        <CheckedTextView
+        <CheckBox
+            android:text="Llamada despertadora!"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkBox" />
+
+        <CheckBox
             android:text="Estoy en el carro."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/checkedTextView2"
-            android:textSize="14sp"
-            android:fontFamily="monospace"
-            android:textAlignment="center" />
+            android:id="@+id/checkBox2" />
 
-        <CheckedTextView
-            android:text="Salí del trabajo"
+        <CheckBox
+            android:text="Salí del trabajo."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/checkedTextView3"
-            android:textSize="14sp"
-            android:fontFamily="monospace"
-            android:textAlignment="center" />
+            android:id="@+id/checkBox3" />
 
-        <CheckedTextView
-            android:text="Me voy a dormir"
+        <CheckBox
+            android:text="Me voy a dormir."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/checkedTextView4"
-            android:textSize="14sp"
-            android:fontFamily="monospace"
-            android:textAlignment="center" />
+            android:id="@+id/checkBox4" />
     </LinearLayout>
 </RelativeLayout>
