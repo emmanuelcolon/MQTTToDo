@@ -27,6 +27,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
 
 public class MainActivity extends Activity {
 
@@ -38,11 +41,15 @@ public class MainActivity extends Activity {
     IntentFilter writeTagFilters[];
     boolean writeMode;
     Tag myTag;
-    Context context;
+    public static Context context;
 
     TextView tvNFCContent;
 
+    CheckBox llamada;
     CheckBox carro;
+    CheckBox trabajo;
+    CheckBox dormir;
+    public static TextView conn;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,9 +57,17 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         context = this;
 
-        tvNFCContent = (TextView) findViewById(R.id.nfc_contents);
-        carro = (CheckBox) findViewById(R.id.checkBox2);
+//        final Intent intent = new Intent(this, MQTTService.class);
+//        startService(intent);
 
+        tvNFCContent = (TextView) findViewById(R.id.nfc_contents);
+        llamada = (CheckBox) findViewById(R.id.checkBox);
+        carro = (CheckBox) findViewById(R.id.checkBox2);
+        trabajo = (CheckBox) findViewById(R.id.checkBox3);
+        dormir = (CheckBox) findViewById(R.id.checkBox4);
+        conn = (TextView) findViewById(R.id.conStatus);
+
+        /*
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
             // Stop here, we definitely need NFC
@@ -65,6 +80,7 @@ public class MainActivity extends Activity {
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
         writeTagFilters = new IntentFilter[] { tagDetected };
+        */
     }
 
 
@@ -159,6 +175,7 @@ public class MainActivity extends Activity {
         }
     }
 
+    /*
     @Override
     public void onPause(){
         super.onPause();
@@ -170,7 +187,7 @@ public class MainActivity extends Activity {
         super.onResume();
         WriteModeOn();
     }
-
+    */
 
 
     /******************************************************************************
@@ -186,6 +203,16 @@ public class MainActivity extends Activity {
     private void WriteModeOff(){
         writeMode = false;
         nfcAdapter.disableForegroundDispatch(this);
+    }
+
+
+    //Lanzar el servicio de MQTT
+    public void startClicked(View view) {
+        startService(new Intent(getBaseContext(), MQTTService.class));
+    }
+
+    public void stopClicked(View view) {
+        stopService(new Intent(getBaseContext(), MQTTService.class));
     }
 
 

@@ -57,6 +57,8 @@
             android:id="@+id/checkBox4" />
 
 
+
+
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -67,6 +69,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
+
+            <Button
+                android:text="Start Service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/button"
+                android:onClick="startClicked" />
+
+            <TextView
+                android:text="Not Connected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/conStatus" />
+
         </LinearLayout>
 
 
