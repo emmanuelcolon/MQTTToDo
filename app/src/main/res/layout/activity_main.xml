@@ -83,6 +83,12 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/conStatus" />
 
+            <Button
+                android:text="Test"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/button2" />
+
         </LinearLayout>
 
 

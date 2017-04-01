@@ -2,9 +2,12 @@ package todo.mqtt.com.mqtttodo;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
@@ -12,6 +15,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NdefFormatable;
+import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +23,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -30,6 +35,8 @@ import java.util.Locale;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+
+import todo.mqtt.com.mqtttodo.MQTTService.LocalBinder;
 
 public class MainActivity extends Activity {
 
@@ -45,11 +52,19 @@ public class MainActivity extends Activity {
 
     TextView tvNFCContent;
 
-    CheckBox llamada;
+    public static CheckBox llamada;
     CheckBox carro;
     CheckBox trabajo;
     CheckBox dormir;
     public static TextView conn;
+    public static Button button1;
+
+    MQTTService mServer;
+    boolean mBounded;
+
+    public static String MY_PREFS = "MY_PREFS";
+    public static SharedPreferences mySharedPreferences;
+    int prefMode = Activity.MODE_PRIVATE;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,15 +72,17 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         context = this;
 
-//        final Intent intent = new Intent(this, MQTTService.class);
-//        startService(intent);
+        startService(new Intent(getBaseContext(), MQTTService.class));
 
         tvNFCContent = (TextView) findViewById(R.id.nfc_contents);
         llamada = (CheckBox) findViewById(R.id.checkBox);
         carro = (CheckBox) findViewById(R.id.checkBox2);
         trabajo = (CheckBox) findViewById(R.id.checkBox3);
         dormir = (CheckBox) findViewById(R.id.checkBox4);
+
         conn = (TextView) findViewById(R.id.conStatus);
+        button1 = (Button) findViewById(R.id.button2);
+        button1.setOnClickListener(mButton1_OnClickListener);
 
         /*
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -125,6 +142,25 @@ public class MainActivity extends Activity {
 
         if(text.equals("Carro")){
             carro.setChecked(true);
+            if(mServer.mClient.isConnected()){
+                mServer.sendMessage("Estoy en el carro");
+            }else{
+                Toast.makeText(MainActivity.this, "Hay problemas con el Raspberry o desconectado", Toast.LENGTH_SHORT).show();
+            }
+        }else if(text.equals("Trabajo")){
+            trabajo.setChecked(true);
+            if(mServer.mClient.isConnected()){
+                mServer.sendMessage("Sali del trabajo");
+            }else{
+                Toast.makeText(MainActivity.this, "Hay problemas con el Raspberry o desconectado", Toast.LENGTH_SHORT).show();
+            }
+        }else if(text.equals("Dormir")){
+            dormir.setChecked(true);
+            if(mServer.mClient.isConnected()){
+                mServer.sendMessage("Me voy a dormir");
+            }else{
+                Toast.makeText(MainActivity.this, "Hay problemas con el Raspberry o desconectado", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -175,19 +211,28 @@ public class MainActivity extends Activity {
         }
     }
 
-    /*
     @Override
     public void onPause(){
         super.onPause();
-        WriteModeOff();
+        SharedPreferences.Editor editor = mySharedPreferences.edit();
+        editor.putBoolean("key1", llamada.isChecked());
+        editor.putBoolean("key2", carro.isChecked());
+        editor.putBoolean("key3", trabajo.isChecked());
+        editor.putBoolean("key4", dormir.isChecked());
+        editor.commit(); // persist the values
+        //WriteModeOff(); //NFC
     }
 
     @Override
     public void onResume(){
         super.onResume();
-        WriteModeOn();
+        mySharedPreferences = getSharedPreferences(MY_PREFS, prefMode);
+        llamada.setChecked(mySharedPreferences.getBoolean("key1",false));
+        carro.setChecked(mySharedPreferences.getBoolean("key2",false));
+        trabajo.setChecked(mySharedPreferences.getBoolean("key3",false));
+        dormir.setChecked(mySharedPreferences.getBoolean("key4",false));
+        //WriteModeOn(); //NFC
     }
-    */
 
 
     /******************************************************************************
@@ -211,9 +256,52 @@ public class MainActivity extends Activity {
         startService(new Intent(getBaseContext(), MQTTService.class));
     }
 
-    public void stopClicked(View view) {
-        stopService(new Intent(getBaseContext(), MQTTService.class));
-    }
 
+    //On click listener for button1
+    final View.OnClickListener mButton1_OnClickListener = new View.OnClickListener() {
+        public void onClick(final View v) {
+
+            if(mServer.mClient.isConnected()){
+                mServer.sendMessage("Probando");
+                carro.setChecked(true);
+            }else{
+                System.out.println("No funciona");
+            }
+        }
+    };
+
+
+    //Binder stuff for Service
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent mIntent = new Intent(this, MQTTService.class);
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
+    };
+
+    ServiceConnection mConnection = new ServiceConnection() {
+
+        public void onServiceDisconnected(ComponentName name) {
+            Toast.makeText(MainActivity.this, "Service is disconnected", Toast.LENGTH_SHORT).show();
+            mBounded = false;
+            mServer = null;
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Toast.makeText(MainActivity.this, "Service is connected", Toast.LENGTH_SHORT).show();
+            mBounded = true;
+            LocalBinder mLocalBinder = (LocalBinder)service;
+            mServer = mLocalBinder.getServerInstance();
+        }
+    };
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mBounded) {
+            unbindService(mConnection);
+            mBounded = false;
+        }
+    };
 
 }

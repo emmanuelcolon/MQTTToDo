@@ -4,32 +4,41 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Random;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
-import org.eclipse.paho.client.mqttv3.internal.MemoryPersistence;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+//import org.eclipse.paho.client.mqttv3.internal.MemoryPersistence;
+
 
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Vibrator;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import android.os.Binder;
 
 public class MQTTService extends Service implements MqttCallback {
 
 	//private static final String SERVER = "tcp://192.168.50.155:1883";
     private static final String SERVER = "tcp://raspberrypi.mshome.net:1883";
 	private static final String TOPIC = "hello/world";
+    MqttMessage msg1 = new MqttMessage("Hello, I am Android Mqtt Client.".getBytes());
+    IBinder mBinder = new LocalBinder();
 
-	private MqttClient mClient;
+	public MqttClient mClient;
 
     private final Handler handler = new Handler(MainActivity.context.getMainLooper());
 
@@ -40,16 +49,34 @@ public class MQTTService extends Service implements MqttCallback {
 			mClient = new MqttClient(SERVER, clientID, new MemoryPersistence());
 			mClient.setCallback(this);
 
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    MainActivity.button1.setOnClickListener(mButton1_OnClickListener);
+//                }
+//            });
+
 		} catch (MqttException e) {
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
 	}
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		return null;
-	}
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+//	@Override
+//	public IBinder onBind(Intent intent) {
+//		return null;
+//	}
+
+    public class LocalBinder extends Binder {
+        public MQTTService getServerInstance() {
+            return MQTTService.this;
+        }
+    }
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -61,8 +88,9 @@ public class MQTTService extends Service implements MqttCallback {
 			@Override
 			public void run() {
 				try {
-					if (!mClient.isConnected())
-						mClient.connect();
+					if (!mClient.isConnected()){
+                        mClient.connect();
+                    }
 
 					mClient.subscribe(TOPIC);
 
@@ -100,7 +128,61 @@ public class MQTTService extends Service implements MqttCallback {
         });
 	}
 
-	@Override
+    @Override
+    public void messageArrived(final String topic, final MqttMessage message) throws Exception {
+
+        System.out.println("Message Arrived: " + topic + " - " + message);
+
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(),
+                        "Message Arrived: " + topic + " - " + message, Toast.LENGTH_SHORT).show();
+
+                if(message.toString().contains("Llamada Despertadora")){
+                    MainActivity.llamada.setChecked(true);
+                    SharedPreferences.Editor editor = MainActivity.mySharedPreferences.edit();
+                    editor.putBoolean("key1", MainActivity.llamada.isChecked());
+                    editor.commit();
+                }
+            }
+        });
+
+        final Vibrator vibrator = (Vibrator) getApplicationContext()
+                .getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(500);
+
+    }
+
+    @Override
+    public void deliveryComplete(IMqttDeliveryToken token) {
+        System.out.println("Delivery Complete!");
+    }
+
+    public void sendMessage(String msg){
+        MqttMessage mensaje = new MqttMessage(msg.getBytes());
+        try {
+            mClient.publish("hello/world1", mensaje);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    //On click listener for button1
+//    final View.OnClickListener mButton1_OnClickListener = new View.OnClickListener() {
+//        public void onClick(final View v) {
+//            try {
+//                mClient.publish("hello/world1", msg1);
+//            } catch (MqttException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    };
+
+
+    /*paho MQTT v1.0.1
+    @Override
 	public void deliveryComplete(MqttDeliveryToken topic) {
 		System.out.println("Delivery Complete: " + topic);
 	}
@@ -123,5 +205,7 @@ public class MQTTService extends Service implements MqttCallback {
 				.getSystemService(Context.VIBRATOR_SERVICE);
 		vibrator.vibrate(500);
 	}
+
+	*/
 
 }
