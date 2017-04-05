@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
         button1 = (Button) findViewById(R.id.button2);
         button1.setOnClickListener(mButton1_OnClickListener);
 
-        /*
+
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
             // Stop here, we definitely need NFC
@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
         writeTagFilters = new IntentFilter[] { tagDetected };
-        */
+
     }
 
 
@@ -140,21 +140,21 @@ public class MainActivity extends Activity {
         tvNFCContent.setText("NFC Content: " + text);
 
 
-        if(text.equals("Carro")){
+        if(text.toString().contains("Carro")){
             carro.setChecked(true);
             if(mServer.mClient.isConnected()){
                 mServer.sendMessage("Estoy en el carro");
             }else{
                 Toast.makeText(MainActivity.this, "Hay problemas con el Raspberry o desconectado", Toast.LENGTH_SHORT).show();
             }
-        }else if(text.equals("Trabajo")){
+        }else if(text.toString().contains("Trabajo")){
             trabajo.setChecked(true);
             if(mServer.mClient.isConnected()){
                 mServer.sendMessage("Sali del trabajo");
             }else{
                 Toast.makeText(MainActivity.this, "Hay problemas con el Raspberry o desconectado", Toast.LENGTH_SHORT).show();
             }
-        }else if(text.equals("Dormir")){
+        }else if(text.toString().contains("Dormir")){
             dormir.setChecked(true);
             if(mServer.mClient.isConnected()){
                 mServer.sendMessage("Me voy a dormir");
@@ -214,24 +214,24 @@ public class MainActivity extends Activity {
     @Override
     public void onPause(){
         super.onPause();
-        SharedPreferences.Editor editor = mySharedPreferences.edit();
-        editor.putBoolean("key1", llamada.isChecked());
-        editor.putBoolean("key2", carro.isChecked());
-        editor.putBoolean("key3", trabajo.isChecked());
-        editor.putBoolean("key4", dormir.isChecked());
-        editor.commit(); // persist the values
-        //WriteModeOff(); //NFC
+//        SharedPreferences.Editor editor = mySharedPreferences.edit();
+//        editor.putBoolean("key1", llamada.isChecked());
+//        editor.putBoolean("key2", carro.isChecked());
+//        editor.putBoolean("key3", trabajo.isChecked());
+//        editor.putBoolean("key4", dormir.isChecked());
+//        editor.commit(); // persist the values
+        WriteModeOff(); //NFC
     }
 
     @Override
     public void onResume(){
         super.onResume();
-        mySharedPreferences = getSharedPreferences(MY_PREFS, prefMode);
-        llamada.setChecked(mySharedPreferences.getBoolean("key1",false));
-        carro.setChecked(mySharedPreferences.getBoolean("key2",false));
-        trabajo.setChecked(mySharedPreferences.getBoolean("key3",false));
-        dormir.setChecked(mySharedPreferences.getBoolean("key4",false));
-        //WriteModeOn(); //NFC
+//        mySharedPreferences = getSharedPreferences(MY_PREFS, prefMode);
+//        llamada.setChecked(mySharedPreferences.getBoolean("key1",false));
+//        carro.setChecked(mySharedPreferences.getBoolean("key2",false));
+//        trabajo.setChecked(mySharedPreferences.getBoolean("key3",false));
+//        dormir.setChecked(mySharedPreferences.getBoolean("key4",false));
+        WriteModeOn(); //NFC
     }
 
 
